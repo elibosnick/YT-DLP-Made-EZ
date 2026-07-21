@@ -1,0 +1,52 @@
+[package]
+name = "video-downloader"
+version = "0.1.0"
+description = "A simple, private video downloader"
+authors = ["Video Downloader contributors"]
+license = "MIT"
+repository = "https://github.com/elibosnick/YT-DLP-Made-EZ"
+edition = "2021"
+rust-version = "1.77"
+
+# Desktop-only, so this is a plain binary crate. The Tauri v2 template splits into a
+# lib target to support mobile; we have no mobile target and the split would only
+# duplicate module wiring.
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[workspace]
+members = ["core"]
+
+[dependencies]
+# All the pure logic, testable without a GUI toolchain: `cargo test -p video-downloader-core`.
+video-downloader-core = { path = "core" }
+
+tauri = { version = "2", features = [] }
+tauri-plugin-updater = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+
+# rustls rather than the system TLS stack: one fewer native dependency to get wrong
+# per platform, and it avoids the OpenSSL cross-compilation pain in CI.
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+# Only for StreamExt, so helper binaries can be hashed and written chunk by chunk
+# instead of being held in memory whole (~80MB for ffmpeg).
+futures-util = { version = "0.3", default-features = false }
+tokio = { version = "1", features = ["macros", "process", "io-util", "fs", "sync", "rt-multi-thread"] }
+sha2 = "0.10"
+url = "2"
+
+[profile.release]
+# The spec asks for a small installer and fast launch. These are the standard Tauri
+# release settings: LTO plus a single codegen unit shrinks the binary substantially,
+# and stripping symbols saves a few more megabytes.
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

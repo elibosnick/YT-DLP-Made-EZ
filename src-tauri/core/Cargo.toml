@@ -1,0 +1,20 @@
+[package]
+name = "video-downloader-core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Pure logic for Video Downloader: URL validation, yt-dlp argument construction, progress parsing, and error translation."
+
+# Deliberately depends on neither Tauri nor any GUI toolkit. That means `cargo test -p
+# video-downloader-core` runs in seconds on any machine, with no webkit2gtk / GTK
+# system packages — which is exactly the code most worth testing, and the code a
+# contributor is most likely to want to iterate on quickly.
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+url = "2"
+
+[dev-dependencies]
+# Used only to assert that the serialized format ids match what the frontend sends.
+serde_json = "1"

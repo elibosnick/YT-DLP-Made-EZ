@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+src-tauri/target/
+src-tauri/gen/
+
+# Vite writes a transient compiled copy of the config next to it on each run.
+vite.config.js.timestamp-*.mjs
+vite.config.*.timestamp-*
+
+# Only the workspace root's lockfile is meaningful; a member crate's is noise.
+src-tauri/core/Cargo.lock
+
+# Tauri updater signing keys — these must never be committed.
+# The private key is what proves an update came from you; leaking it lets anyone
+# push a "signed" update to every installed copy of the app.
+*.key
+*.pem
+src-tauri/*.key
+
+# Environment
+.env
+.env.local
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

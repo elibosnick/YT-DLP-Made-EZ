@@ -1,0 +1,24 @@
+name: Check helper binary URLs
+
+# The app downloads yt-dlp and ffmpeg from upstream GitHub releases on first run.
+# Those asset names are owned by other projects and can be renamed without warning —
+# and when that happens, the failure lands on a brand-new user's very first launch,
+# which is the worst possible place for it.
+#
+# This job checks the URLs weekly so a rename shows up as a failed build here instead.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+  push:
+    paths:
+      - "src-tauri/src/ytdlp.rs"
+      - "scripts/verify-binary-urls.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/verify-binary-urls.sh
