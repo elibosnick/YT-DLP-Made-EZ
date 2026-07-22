@@ -261,15 +261,20 @@ fn hex_encode(bytes: &[u8]) -> String {
 const YTDLP_VERSION_FLAG: &str = "--version";
 const FFMPEG_VERSION_FLAG: &str = "-version";
 
-/// True when both binaries are present and actually runnable.
+/// Fast readiness check for the UI's launch path: are both helper binaries present?
+///
+/// Deliberately does NOT run `--version` here. That functional check is worth doing —
+/// but yt-dlp ships as a self-extracting binary that takes ~1 second to start on macOS,
+/// and running it on every launch froze the window (the form stayed disabled until it
+/// returned, which reads as a hang). So we only confirm the files exist here, which is
+/// instant. The real smoke test happens once during first-run setup, and the background
+/// `ensure_tools` task re-verifies on each launch and silently re-downloads a broken
+/// binary — all off the interface's critical path.
 pub async fn tools_ready(app: &AppHandle) -> bool {
     let (Ok(y), Ok(f)) = (ytdlp_path(app), ffmpeg_path(app)) else {
         return false;
     };
-    y.exists()
-        && f.exists()
-        && smoke_test(&y, YTDLP_VERSION_FLAG).await.is_ok()
-        && smoke_test(&f, FFMPEG_VERSION_FLAG).await.is_ok()
+    y.exists() && f.exists()
 }
 
 /// Runs `<binary> <version flag>` to confirm the file is not merely present but
