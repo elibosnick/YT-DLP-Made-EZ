@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "YT-DLP Made EZ",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "com.elibosnick.ytdlpmadeez",
   "build": {
     "frontendDist": "../dist",
@@ -28,7 +28,12 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["msi", "nsis", "dmg", "appimage"],
+    "targets": [
+      "msi",
+      "nsis",
+      "dmg",
+      "appimage"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -40,7 +45,7 @@
     "longDescription": "A simple, private video downloader. Paste a link, pick a format, click Download. Everything happens on your computer.",
     "copyright": "MIT licensed",
     "category": "Utility",
-    "createUpdaterArtifacts": false,
+    "createUpdaterArtifacts": true,
     "macOS": {
       "minimumSystemVersion": "10.15",
       "signingIdentity": "-"
@@ -61,7 +66,7 @@
       "endpoints": [
         "https://github.com/elibosnick/YT-DLP-Made-EZ/releases/latest/download/latest.json"
       ],
-      "pubkey": "REPLACE_WITH_TAURI_SIGNING_PUBLIC_KEY",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk2NDEzRTE1QTlGRjlGNzgKUldSNG4vK3BGVDVCbHYyMDNpSlY2aEZXOE1aTWVIUHUzYzcxczZQaGZNWnVaQVNRT21QdjZtN0oK",
       "windows": {
         "installMode": "passive"
       }

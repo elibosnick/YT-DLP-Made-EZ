@@ -154,4 +154,4 @@ jobs:
             The very first launch also takes a minute to set itself up (it downloads its helper tools). That's normal and only happens once.
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: false
+          includeUpdaterJson: true

@@ -1,6 +1,6 @@
 {
   "name": "video-downloader",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A simple, private video downloader",
   "license": "MIT",
   "private": true,
