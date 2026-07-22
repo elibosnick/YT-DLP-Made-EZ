@@ -1,6 +1,6 @@
 [package]
 name = "video-downloader"
-version = "0.1.5"
+version = "0.1.6"
 description = "A simple, private video downloader"
 authors = ["Video Downloader contributors"]
 license = "MIT"
