@@ -10,3 +10,12 @@ export const mockListen = vi.fn(() => Promise.resolve(() => {}));
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke: (...args) => mockInvoke(...args) }));
 vi.mock("@tauri-apps/api/event", () => ({ listen: (...args) => mockListen(...args) }));
+
+// The window handle only exists inside a real webview; stub show()/setFocus() so the
+// startup-reveal effect is a no-op under test.
+vi.mock("@tauri-apps/api/window", () => ({
+  getCurrentWindow: () => ({
+    show: () => Promise.resolve(),
+    setFocus: () => Promise.resolve(),
+  }),
+}));

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import DownloadForm from "./components/DownloadForm.jsx";
 import ProgressBar from "./components/ProgressBar.jsx";
@@ -52,6 +53,28 @@ export default function App() {
   useEffect(() => {
     runSetup();
   }, [runSetup]);
+
+  // The window is created hidden (see tauri.conf.json "visible": false). Reveal it only
+  // once the interface has painted, so a first-time user never sees the webview's brief
+  // blank "warm-up" flash and assumes the app froze. We wait two animation frames (the
+  // UI is on screen by then), with a hard 1.5s safety net so the window can never get
+  // stuck hidden if something above throws.
+  useEffect(() => {
+    const win = getCurrentWindow();
+    let shown = false;
+    const reveal = () => {
+      if (shown) return;
+      shown = true;
+      win.show().catch(() => {});
+      win.setFocus().catch(() => {});
+    };
+    const raf = requestAnimationFrame(() => requestAnimationFrame(reveal));
+    const safety = setTimeout(reveal, 1500);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(safety);
+    };
+  }, []);
 
   useEffect(() => {
     const unlisten = listen("setup-progress", (event) => setSetupProgress(event.payload));
