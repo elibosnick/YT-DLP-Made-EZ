@@ -136,15 +136,20 @@ jobs:
             ### Download the file for your computer
             - **Mac (Apple Silicon — M1/M2/M3/M4):** the `aarch64.dmg`
             - **Mac (Intel):** the `x64.dmg`
-            - **Windows:** the `.msi`
+            - **Windows:** the `x64-setup.exe`
             - **Linux:** the `.AppImage`
 
-            ### First time you open it on a Mac
-            Because this app is free and isn't signed with a paid Apple certificate, macOS will say it can't verify the developer. To open it (only needed once):
-            1. Double-click the app, then click **Done** on the warning.
-            2. Open **System Settings → Privacy & Security**.
-            3. Scroll to **Security**, find "YT-DLP Made EZ was blocked," and click **Open Anyway**.
-            4. Confirm with your password or Touch ID.
+            ### Opening it on a Mac the first time
+            This app is free and isn't signed with a paid Apple certificate, so macOS warns you the first time. Open the `.dmg`, drag the app into your **Applications** folder, then:
+
+            1. In **Applications**, double-click **YT-DLP Made EZ**.
+            2. If macOS says it can't verify the developer, click **Done**.
+            3. Open **System Settings → Privacy & Security**, scroll to the **Security** section, and click **Open Anyway** next to YT-DLP Made EZ. Confirm with your password or Touch ID. (You only do this once.)
+
+            **If macOS instead says the app is "damaged":** that's just an over-cautious flag on unsigned apps, not a real problem. Open the **Terminal** app (in Applications → Utilities), paste the line below exactly, press Return, then open the app normally:
+            ```
+            xattr -dr com.apple.quarantine "/Applications/YT-DLP Made EZ.app"
+            ```
 
             The very first launch also takes a minute to set itself up (it downloads its helper tools). That's normal and only happens once.
           releaseDraft: true

@@ -29,12 +29,16 @@ impl Format {
     pub fn args(self) -> Vec<String> {
         let s = |v: &str| v.to_string();
         match self {
-            // mp4 video + m4a audio can be merged by remuxing rather than re-encoding,
-            // so this is both fast and lossless. The fallbacks give up the container
-            // preference before they give up on downloading at all.
+            // Prefer H.264 video (avc1) + AAC audio (mp4a): the combination macOS plays
+            // natively in QuickTime, Photos, and iMovie with nothing extra installed.
+            // Newer YouTube uploads default to VP9/AV1 video + Opus audio, which land in
+            // an .mp4 container fine but make QuickTime say "not compatible" — useless to
+            // a non-technical user. We trade a little max resolution (H.264 tops out at
+            // 1080p on YouTube) for a file that Just Plays. "Best Available" is there for
+            // anyone who wants the higher-res codecs instead.
             Format::BestQuality => vec![
                 s("-f"),
-                s("bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b[ext=mp4]/b"),
+                s("bv*[vcodec^=avc1]+ba[acodec^=mp4a]/bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b"),
                 s("--merge-output-format"),
                 s("mp4"),
             ],
@@ -213,6 +217,19 @@ mod tests {
             value_after(&Format::BestQuality.args(), "--merge-output-format"),
             "mp4"
         );
+    }
+
+    #[test]
+    fn best_quality_prefers_quicktime_friendly_codecs() {
+        // Regression guard for the "downloaded video won't play in QuickTime" bug: the
+        // default preset must prefer H.264 video + AAC audio so files play natively on
+        // macOS with nothing extra installed.
+        let selector = value_after(&Format::BestQuality.args(), "-f");
+        assert!(
+            selector.contains("avc1"),
+            "lost H.264 preference: {selector}"
+        );
+        assert!(selector.contains("mp4a"), "lost AAC preference: {selector}");
     }
 
     #[test]
