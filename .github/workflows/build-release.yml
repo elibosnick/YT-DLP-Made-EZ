@@ -52,6 +52,11 @@ jobs:
 
   build:
     needs: test
+    # A congested Apple notary queue once hung a macOS leg for the full 6-hour
+    # ceiling before GitHub killed it. Cap every leg so a bad notarization day
+    # fails fast and can be retried, instead of silently burning hours. Healthy
+    # runs (compile + notarize) finish in ~20-25 minutes.
+    timeout-minutes: 60
     strategy:
       # Never cancel siblings: a macOS-only failure should not throw away a
       # perfectly good Windows installer that took 15 minutes to produce.
@@ -140,19 +145,10 @@ jobs:
             - **Windows:** the `x64-setup.exe`
             - **Linux:** the `.AppImage`
 
-            ### Opening it on a Mac the first time
-            This app is free and isn't signed with a paid Apple certificate, so macOS warns you the first time. Open the `.dmg`, drag the app into your **Applications** folder, then:
+            ### Mac install
+            Open the `.dmg`, drag **YT-DLP Made EZ** into your **Applications** folder, and double-click to launch. That's it — the app is signed and notarized by Apple, so there are no warnings or extra steps.
 
-            1. In **Applications**, double-click **YT-DLP Made EZ**.
-            2. If macOS says it can't verify the developer, click **Done**.
-            3. Open **System Settings → Privacy & Security**, scroll to the **Security** section, and click **Open Anyway** next to YT-DLP Made EZ. Confirm with your password or Touch ID. (You only do this once.)
-
-            **If macOS instead says the app is "damaged":** that's just an over-cautious flag on unsigned apps, not a real problem. Open the **Terminal** app (in Applications → Utilities), paste the line below exactly, press Return, then open the app normally:
-            ```
-            xattr -dr com.apple.quarantine "/Applications/YT-DLP Made EZ.app"
-            ```
-
-            The very first launch also takes a minute to set itself up (it downloads its helper tools). That's normal and only happens once.
+            The very first launch takes a minute to set itself up (it downloads its helper tools). That's normal and only happens once.
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
