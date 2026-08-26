@@ -67,18 +67,18 @@ pub async fn download_video(
 
     let mut cmd = crate::process::command(&ytdlp_bin);
     cmd.args(build_ytdlp_args(
-            format,
-            &ffmpeg_bin,
-            &downloads,
-            use_browser_cookies,
-        ))
-        // `--` terminates option parsing. Without it, a URL beginning with a dash
-        // would be interpreted as a flag.
-        .arg("--")
-        .arg(&url)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .stdin(Stdio::null());
+        format,
+        &ffmpeg_bin,
+        &downloads,
+        use_browser_cookies,
+    ))
+    // `--` terminates option parsing. Without it, a URL beginning with a dash
+    // would be interpreted as a flag.
+    .arg("--")
+    .arg(&url)
+    .stdout(Stdio::piped())
+    .stderr(Stdio::piped())
+    .stdin(Stdio::null());
 
     let mut child = cmd
         .spawn()
