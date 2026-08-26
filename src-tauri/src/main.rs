@@ -3,6 +3,7 @@
 // non-technical user.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod bridge;
 mod commands;
 mod process;
 mod updater;
@@ -32,6 +33,13 @@ fn main() {
             // blocking startup on a network fetch would blow that on a slow connection,
             // and on first run it would look like a hang.
             tauri::async_runtime::spawn(async move {
+                let bridge_handle = handle.clone();
+                tauri::async_runtime::spawn(async move {
+                    if let Err(e) = bridge::run(bridge_handle).await {
+                        eprintln!("browser helper bridge unavailable: {e}");
+                    }
+                });
+
                 if let Err(e) = ytdlp::ensure_tools(&handle).await {
                     // The frontend learns about this through `tools_ready`; log for
                     // developers rather than interrupting the user with a dialog.

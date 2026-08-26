@@ -97,6 +97,13 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const unlisten = listen("browser-media-url", (event) => setUrl(event.payload));
+    return () => {
+      unlisten.then((fn) => fn()).catch(() => {});
+    };
+  }, []);
+
   // --- App updates -----------------------------------------------------------
 
   useEffect(() => {

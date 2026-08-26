@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "YT-DLP Made EZ Helper",
+  "version": "0.1.0",
+  "description": "Sends a detected non-DRM media URL to YT-DLP Made EZ on this computer.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["http://127.0.0.1:32123/*"],
+  "action": { "default_title": "Send video to YT-DLP Made EZ" },
+  "background": { "service_worker": "background.js" }
+}
