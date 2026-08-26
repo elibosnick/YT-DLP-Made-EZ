@@ -38,7 +38,11 @@ impl Format {
             // anyone who wants the higher-res codecs instead.
             Format::BestQuality => vec![
                 s("-f"),
-                s("bv*[vcodec^=avc1]+ba[acodec^=mp4a]/bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b"),
+                // Try the friendly MP4 combination first, but fall back to the
+                // best video/audio pair for generic pages. Many non-YouTube players
+                // expose WebM, HLS, or DASH formats without codec names that match
+                // the YouTube-oriented selectors above.
+                s("bv*[vcodec^=avc1]+ba[acodec^=mp4a]/bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b"),
                 s("--merge-output-format"),
                 s("mp4"),
             ],
@@ -105,6 +109,10 @@ pub fn build_ytdlp_args(format: Format, ffmpeg: &Path, out_dir: &Path) -> Vec<St
         s("--retries"),
         s("3"),
         s("--fragment-retries"),
+        s("3"),
+        // Generic pages and segmented streams are more likely to need a second
+        // extractor attempt after a transient response or redirect.
+        s("--extractor-retries"),
         s("3"),
         // Without this a failed download leaves .part files littering Downloads, which
         // is both confusing and looks like the app is broken.
