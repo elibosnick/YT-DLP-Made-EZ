@@ -91,8 +91,21 @@ describe("download", () => {
       expect(mockInvoke).toHaveBeenCalledWith("download_video", {
         url: "https://youtu.be/x",
         format: "audio_mp3",
+        useBrowserCookies: false,
       })
     );
+  });
+
+  it("can enable local browser cookies for login-gated sites", async () => {
+    readyApp({ download_video: { file_path: "/d/v.mp4", file_name: "v.mp4", folder: "/d" } });
+    render(<App />);
+    const cookie = await screen.findByRole("checkbox", { name: /use my chrome login/i });
+    await userEvent.click(cookie);
+    await userEvent.type(screen.getByLabelText(/paste video link/i), "https://facebook.com/reel/x");
+    await userEvent.click(screen.getByRole("button", { name: /^download$/i }));
+    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith("download_video", expect.objectContaining({
+      useBrowserCookies: true,
+    })));
   });
 
   it("disables the button while downloading", async () => {
@@ -253,6 +266,8 @@ describe("keyboard navigation", () => {
     expect(screen.getByRole("radio", { name: /best quality/i })).toHaveFocus();
 
     // Radio groups are a single tab stop; arrows move within them.
+    await userEvent.tab();
+    expect(screen.getByRole("checkbox", { name: /use my chrome login/i })).toHaveFocus();
     await userEvent.tab();
     expect(screen.getByRole("button", { name: /^download$/i })).toHaveFocus();
   });

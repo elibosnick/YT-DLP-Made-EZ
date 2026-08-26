@@ -12,6 +12,8 @@ export default function DownloadForm({
   onUrlChange,
   format,
   onFormatChange,
+  useBrowserCookies,
+  onUseBrowserCookiesChange,
   onSubmit,
   busy,
   disabled,
@@ -52,6 +54,19 @@ export default function DownloadForm({
       />
 
       <FormatSelector value={format} onChange={onFormatChange} disabled={busy || disabled} />
+
+      <label className="cookie-option">
+        <input
+          type="checkbox"
+          checked={useBrowserCookies}
+          onChange={(e) => onUseBrowserCookiesChange(e.target.checked)}
+          disabled={busy || disabled}
+        />
+        <span>
+          Use my Chrome login for Facebook and other sites
+          <small>Only used on this computer. Nothing is uploaded.</small>
+        </span>
+      </label>
 
       <button
         type="submit"

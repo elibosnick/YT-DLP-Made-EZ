@@ -202,6 +202,30 @@ form {
   cursor: pointer;
 }
 
+.cookie-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 14px 2px 18px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.cookie-option input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.cookie-option small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+}
+
 .format-text {
   display: flex;
   flex-direction: column;

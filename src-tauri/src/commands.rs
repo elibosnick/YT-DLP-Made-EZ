@@ -44,6 +44,7 @@ pub async fn download_video(
     lock: State<'_, DownloadLock>,
     url: String,
     format: Format,
+    use_browser_cookies: bool,
 ) -> Result<DownloadResult> {
     // Validate before taking the lock, so a typo gives instant feedback.
     let url = validate_url(&url)?;
@@ -65,7 +66,12 @@ pub async fn download_video(
         .map_err(|e| AppError::Io(format!("could not find your Downloads folder: {e}")))?;
 
     let mut cmd = crate::process::command(&ytdlp_bin);
-    cmd.args(build_ytdlp_args(format, &ffmpeg_bin, &downloads))
+    cmd.args(build_ytdlp_args(
+            format,
+            &ffmpeg_bin,
+            &downloads,
+            use_browser_cookies,
+        ))
         // `--` terminates option parsing. Without it, a URL beginning with a dash
         // would be interpreted as a flag.
         .arg("--")

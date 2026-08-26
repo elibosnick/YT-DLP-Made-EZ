@@ -67,7 +67,12 @@ impl Format {
 }
 
 /// The full yt-dlp argument list, minus the trailing `-- <url>`.
-pub fn build_ytdlp_args(format: Format, ffmpeg: &Path, out_dir: &Path) -> Vec<String> {
+pub fn build_ytdlp_args(
+    format: Format,
+    ffmpeg: &Path,
+    out_dir: &Path,
+    use_browser_cookies: bool,
+) -> Vec<String> {
     let s = |v: &str| v.to_string();
 
     let mut args = vec![
@@ -120,6 +125,11 @@ pub fn build_ytdlp_args(format: Format, ffmpeg: &Path, out_dir: &Path) -> Vec<St
     ];
 
     args.extend(format.args());
+    if use_browser_cookies {
+        // Facebook and some other sites require the user's existing browser session.
+        // yt-dlp reads this locally; the app never receives or uploads the cookies.
+        args.extend([s("--cookies-from-browser"), s("chrome")]);
+    }
     args
 }
 
@@ -131,7 +141,7 @@ mod tests {
     const ALL: [Format; 3] = [Format::BestQuality, Format::AudioMp3, Format::BestAvailable];
 
     fn args_for(f: Format) -> Vec<String> {
-        build_ytdlp_args(f, Path::new("/tmp/ffmpeg"), Path::new("/tmp/dl"))
+        build_ytdlp_args(f, Path::new("/tmp/ffmpeg"), Path::new("/tmp/dl"), false)
     }
 
     fn value_after(args: &[String], flag: &str) -> String {

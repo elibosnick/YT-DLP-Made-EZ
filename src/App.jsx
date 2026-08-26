@@ -20,6 +20,9 @@ export default function App() {
 
   const [url, setUrl] = useState("");
   const [format, setFormat] = useState("best_quality");
+  const [useBrowserCookies, setUseBrowserCookies] = useState(
+    () => window.localStorage?.getItem("use-browser-cookies") === "true",
+  );
 
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -119,7 +122,11 @@ export default function App() {
     setDownloading(true);
 
     try {
-      const downloadResult = await invoke("download_video", { url, format });
+      const downloadResult = await invoke("download_video", {
+        url,
+        format,
+        useBrowserCookies,
+      });
       setResult(downloadResult);
       setProgress(null);
       // Spec: auto-clear the success message after 5 seconds.
@@ -179,6 +186,11 @@ export default function App() {
         onUrlChange={setUrl}
         format={format}
         onFormatChange={setFormat}
+        useBrowserCookies={useBrowserCookies}
+        onUseBrowserCookiesChange={(value) => {
+          setUseBrowserCookies(value);
+          window.localStorage?.setItem("use-browser-cookies", String(value));
+        }}
         onSubmit={handleDownload}
         busy={downloading}
         disabled={setupState !== "ready"}
