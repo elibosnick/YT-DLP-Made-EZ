@@ -1,6 +1,6 @@
 [package]
 name = "video-downloader"
-version = "0.1.11"
+version = "0.1.12"
 description = "A simple, private video downloader"
 authors = ["Video Downloader contributors"]
 license = "MIT"
@@ -39,6 +39,7 @@ reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"
 futures-util = { version = "0.3", default-features = false }
 tokio = { version = "1", features = ["macros", "process", "io-util", "fs", "sync", "rt-multi-thread"] }
 sha2 = "0.10"
+zip = "2"
 url = "2"
 
 [profile.release]

@@ -60,6 +60,7 @@ pub async fn download_video(
 
     let ytdlp_bin = ytdlp::ytdlp_path(&app)?;
     let ffmpeg_bin = ytdlp::ffmpeg_path(&app)?;
+    let deno_bin = ytdlp::deno_path(&app)?;
     let downloads = app
         .path()
         .download_dir()
@@ -74,6 +75,10 @@ pub async fn download_video(
     ))
     // `--` terminates option parsing. Without it, a URL beginning with a dash
     // would be interpreted as a flag.
+    .arg("--js-runtimes")
+    .arg(format!("deno:{}", deno_bin.to_string_lossy()))
+    .arg("--remote-components")
+    .arg("ejs:github")
     .arg("--")
     .arg(&url)
     .stdout(Stdio::piped())

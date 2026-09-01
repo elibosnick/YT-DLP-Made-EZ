@@ -13,6 +13,7 @@
 //! extended attribute (that is applied by browsers and other LSFileQuarantineEnabled
 //! apps), so the downloaded binaries execute without a Gatekeeper prompt.
 
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -92,8 +93,20 @@ fn ffmpeg_asset_name() -> Result<&'static str> {
     })
 }
 
+fn deno_asset_name() -> Result<&'static str> {
+    Ok(match (std::env::consts::OS, std::env::consts::ARCH) {
+        ("windows", "x86_64") => "deno-x86_64-pc-windows-msvc.zip",
+        ("macos", "aarch64") => "deno-aarch64-apple-darwin.zip",
+        ("macos", _) => "deno-x86_64-apple-darwin.zip",
+        ("linux", "aarch64") => "deno-aarch64-unknown-linux-gnu.zip",
+        ("linux", _) => "deno-x86_64-unknown-linux-gnu.zip",
+        (os, arch) => return Err(AppError::UnsupportedPlatform(format!("{os}/{arch}"))),
+    })
+}
+
 const YTDLP_BASE: &str = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 const FFMPEG_BASE: &str = "https://github.com/eugeneware/ffmpeg-static/releases/latest/download";
+const DENO_BASE: &str = "https://github.com/denoland/deno/releases/latest/download";
 
 fn exe_suffix() -> &'static str {
     if cfg!(windows) {
@@ -124,6 +137,10 @@ pub fn ytdlp_path(app: &AppHandle) -> Result<PathBuf> {
 
 pub fn ffmpeg_path(app: &AppHandle) -> Result<PathBuf> {
     Ok(bin_dir(app)?.join(format!("ffmpeg{}", exe_suffix())))
+}
+
+pub fn deno_path(app: &AppHandle) -> Result<PathBuf> {
+    Ok(bin_dir(app)?.join(format!("deno{}", exe_suffix())))
 }
 
 // ---------------------------------------------------------------------------
@@ -312,6 +329,37 @@ pub async fn ensure_tools(app: &AppHandle) -> Result<()> {
 
     let ytdlp = ytdlp_path(app)?;
     let ffmpeg = ffmpeg_path(app)?;
+    let deno = deno_path(app)?;
+
+    if !deno.exists() {
+        emit_setup(app, "Getting YouTube support ready…", 5);
+        let asset = deno_asset_name()?;
+        let bytes = reqwest::get(format!("{DENO_BASE}/{asset}"))
+            .await
+            .map_err(|e| AppError::Network(format!("could not download YouTube support: {e}")))?
+            .bytes()
+            .await
+            .map_err(|e| AppError::Network(format!("could not read YouTube support: {e}")))?;
+        let mut archive = zip::ZipArchive::new(Cursor::new(bytes))
+            .map_err(|e| AppError::Io(format!("could not open YouTube support: {e}")))?;
+        let mut entry = archive
+            .by_name(if cfg!(windows) { "deno.exe" } else { "deno" })
+            .map_err(|e| AppError::Io(format!("YouTube support is missing its runtime: {e}")))?;
+        let mut file = std::fs::File::create(&deno)
+            .map_err(|e| AppError::Io(format!("could not install YouTube support: {e}")))?;
+        std::io::copy(&mut entry, &mut file)
+            .map_err(|e| AppError::Io(format!("could not install YouTube support: {e}")))?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut permissions = std::fs::metadata(&deno)
+                .map_err(|e| AppError::Io(e.to_string()))?
+                .permissions();
+            permissions.set_mode(0o755);
+            std::fs::set_permissions(&deno, permissions)
+                .map_err(|e| AppError::Io(e.to_string()))?;
+        }
+    }
 
     if !ytdlp.exists() || smoke_test(&ytdlp, YTDLP_VERSION_FLAG).await.is_err() {
         emit_setup(app, "Getting the video downloader ready…", 10);
